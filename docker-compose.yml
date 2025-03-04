@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:13.20
+    environment:
+      POSTGRES_PASSWORD: justapassword
+      POSTGRES_USER: justanuser
+      POSTGRES_DB: campaign_manager
+    ports:
+      - 5432:5432
