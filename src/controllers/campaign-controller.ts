@@ -69,6 +69,40 @@ class CampaignController {
         res.status(200).json({ campaign })
     }
 
+    static async addCampaign(req: Request, res: Response) {
+        if(CampaignController.returnErrorIfModelNotDefined(req, res)) return;
+
+        const model  = req.model as Campaign;
+
+        const errors: string[] = [];
+
+        const {success, error, data: payload} = CampaignSchema.safeParse(req.body);
+
+        if(!success) {
+            error.errors.forEach(e => errors.push(`${e.path.pop()}: ${e.message}`));
+            return res.status(400).json({ errors });
+        }
+        
+        if(payload.dataInicio && payload.dataFim ){
+            const isValid = checkDataFimGTDataInicio(new Date(payload.dataInicio), new Date(payload.dataFim));
+            if(true !== isValid) errors.push(isValid)
+        }
+
+        const isValid = checkDataInicioGTENow(new Date(payload.dataInicio));
+        if(true !== isValid) errors.push(isValid)
+
+        if(errors.length > 0) return res.status(400).json({ errors });
+
+        try { 
+            const campaign = await model.storeCampaign(payload);
+            
+            res.status(201).json({ campaign })
+        } catch(err) {
+            console.error(err);
+            res.status(500).json({ errors: ['something went wrong'] });
+        }
+    }
+
 }
 
 export default CampaignController;
