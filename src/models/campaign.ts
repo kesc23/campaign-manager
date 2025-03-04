@@ -23,4 +23,9 @@ export default class Campaign implements BaseModel {
     async storeCampaign(data: Prisma.campaignsUncheckedCreateInput ) {
         return this.client.campaigns.create({ data });
     }
+
+    async updateCampaign(id: number, data: Prisma.campaignsUncheckedUpdateInput ) {
+        return this.client.campaigns.update({ where: { id }, data: data });
+    }
+
 }
