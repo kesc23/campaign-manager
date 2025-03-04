@@ -28,4 +28,8 @@ export default class Campaign implements BaseModel {
         return this.client.campaigns.update({ where: { id }, data: data });
     }
 
+    async deleteCampaign(id: number, soft: boolean | undefined | null = true) {
+        if(!soft) return this.client.campaigns.delete({ where: { id } });
+        return this.updateCampaign(id, { excluido: true, dataExclusao: new Date() } );
+    }
 }
