@@ -20,4 +20,7 @@ export default class Campaign implements BaseModel {
         return this.client.campaigns.findFirst({ where: { id: {equals: id}} });
     }
 
+    async storeCampaign(data: Prisma.campaignsUncheckedCreateInput ) {
+        return this.client.campaigns.create({ data });
+    }
 }
