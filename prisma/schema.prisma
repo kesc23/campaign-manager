@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model campaigns {
+  id           Int                   @id @default(autoincrement())
+  nome         String                @db.VarChar
+  dataCadastro DateTime              @default(now()) @db.Timestamp(6)
+  dataInicio   DateTime              @db.Timestamp(6)
+  dataFim      DateTime              @db.Timestamp(6)
+  status       campaigns_status_enum @default(pausada)
+  categoria    String                @db.VarChar
+  dataExclusao DateTime?             @db.Timestamp(6)
+  excluido     Boolean               @default(false) @db.Boolean
+}
+
+enum campaigns_status_enum {
+  ativa
+  pausada
+  expirada
+}
