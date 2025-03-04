@@ -9,4 +9,11 @@ export default class Campaign implements BaseModel {
         this.client = client;
     }
 
+    async getCampaigns(limit: number, offset: number) {
+        return this.client.campaigns.findMany({
+            take: limit,
+            skip: offset
+        })
+    }
+
 }
