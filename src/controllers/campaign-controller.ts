@@ -7,6 +7,11 @@ import checkDataInicioGTENow from "../validators/datainicio-gte-now.js";
 import validateOptionalBool from "../validators/validate-optional-bool.js";
 
 class CampaignController {
+    static returnErrorIfModelNotDefined(req: Request, res: Response) {
+        if(req.model) return false;
+        return res.status(500).json({ errors: ['something went wrong'] });
+    }
+
 }
 
 export default CampaignController;
