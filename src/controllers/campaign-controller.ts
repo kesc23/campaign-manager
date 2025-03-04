@@ -103,6 +103,58 @@ class CampaignController {
         }
     }
 
+    static async updateCampaign(req: Request, res: Response) {
+        if(CampaignController.returnErrorIfModelNotDefined(req, res)) return;
+        const model   = req.model as Campaign;
+        const { id }  = req.params;
+        const errors: string[] = [];
+
+        const {success: idSuccess, error: idError, data: parsedId } = CampaingIdSchema.safeParse(id);
+
+        if(!idSuccess) {
+            idError.errors.forEach(e => errors.push(`${e.message}`));
+            return res.status(400).json({ errors });
+        }
+
+        const current = await model.getCampaign(parsedId);
+
+        if( !current ) {
+            return res.status(404).json({ errors: [`campaign with id ${parsedId} not found`] });
+        } 
+
+        const {success, error, data: payload} = CampaignEditSchema.safeParse(req.body);
+
+        if(!success) {
+            error.errors.forEach(e => errors.push(`${e.path.pop()}: ${e.message}`));
+            return res.status(400).json({ errors });
+        }
+
+        if(payload.dataInicio && payload.dataFim ){
+            const isValid = checkDataFimGTDataInicio(new Date(payload.dataInicio), new Date(payload.dataFim));
+            if(true !== isValid) errors.push(isValid)
+        }
+    
+        if(payload.dataInicio && !payload.dataFim ){
+            const isValid = checkDataFimGTDataInicio(new Date(payload.dataInicio), new Date(current.dataFim));
+            if(true !== isValid) errors.push(isValid)
+        }
+
+        if(!payload.dataInicio && payload.dataFim ){
+            const isValid = checkDataFimGTDataInicio(new Date(current.dataInicio), new Date(payload.dataFim));
+            if(true !== isValid) errors.push(isValid)
+        }
+
+        if(errors.length > 0) return res.status(400).json({ errors });
+
+        try { 
+            const campaign = await model.updateCampaign(parsedId, payload);
+            res.status(200).json({ campaign })
+        } catch(err) {
+            console.error(err);
+            res.status(500).json({ errors: ['something went wrong'] });
+        }
+    }
+
 }
 
 export default CampaignController;
