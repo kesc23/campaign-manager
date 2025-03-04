@@ -16,4 +16,8 @@ export default class Campaign implements BaseModel {
         })
     }
 
+    async getCampaign(id: number) {
+        return this.client.campaigns.findFirst({ where: { id: {equals: id}} });
+    }
+
 }
