@@ -155,6 +155,49 @@ class CampaignController {
         }
     }
 
+    static async deleteCampaign(req: Request, res: Response) {
+        if(CampaignController.returnErrorIfModelNotDefined(req, res)) return;
+        const model   = req.model as Campaign;
+        const { id }  = req.params;
+        const { soft }  = req.query;
+        const errors: string[] = [];
+
+        const {success: softSuccess, error: softError, data: parsedsoft } = validateOptionalBool( soft as boolean | null | undefined ?? false );
+
+        if(!softSuccess) {
+            softError.errors.forEach(e => errors.push(`${e.message}`));
+            return res.status(400).json({ errors });
+        }
+
+        const {success: idSuccess, error: idError, data: parsedId } = CampaingIdSchema.safeParse(id);
+
+        if(!idSuccess) {
+            idError.errors.forEach(e => errors.push(`${e.message}`));
+            return res.status(400).json({ errors });
+        }
+
+        const current = await model.getCampaign(parsedId);
+
+        if( !current ) {
+            return res.status(404).json({ errors: [`campaign with id ${parsedId} not found`] });
+        }
+
+        if (current.excluido && parsedsoft) {
+            return res.status(404).json({ errors: [`campaign with id ${parsedId} not found`] });
+        }
+
+        try {
+            const deleted = await model.deleteCampaign(parsedId, parsedsoft);
+            if( !parsedsoft) {
+                deleted.excluido = true;
+                deleted.dataExclusao = new Date();
+            }
+            res.status(200).json({ deleted })
+        } catch(err) {
+            console.error(err);
+            res.status(500).json({ errors: ['something went wrong'] });
+        }
+    }
 }
 
 export default CampaignController;
