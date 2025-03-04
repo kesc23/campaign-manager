@@ -45,6 +45,30 @@ class CampaignController {
         res.status(200).json({ campaigns });
     }
 
+    static async getCampaign(req: Request, res: Response) {
+        if(CampaignController.returnErrorIfModelNotDefined(req, res)) return;
+
+        const model  = req.model as Campaign;
+        const { id } = req.params;
+        const errors: string[] = [];
+
+        const {success, error, data: parsedId } = CampaingIdSchema.safeParse(id);
+
+        if(!success) {
+            error.errors.forEach(e => errors.push(`${e.message}`));
+            return res.status(400).json({ errors });
+        }
+
+        const campaign = await model.getCampaign(parsedId);
+
+        if(!campaign) {
+            errors.push(`campaign with id ${parsedId} not found`)
+            return res.status(404).json({ errors });
+        }
+
+        res.status(200).json({ campaign })
+    }
+
 }
 
 export default CampaignController;
